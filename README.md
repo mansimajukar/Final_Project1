@@ -50,7 +50,7 @@ python app.py
 
 #Screenshots:
 
-#Admin Panel:
+Admin Panel:
 
 <img width="1356" height="612" alt="Screenshot 2026-05-04 190640" src="https://github.com/user-attachments/assets/60dac5ea-78da-4e92-a9d8-32d63ee0af99" />
 
