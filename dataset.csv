@@ -1,0 +1,9 @@
+url,label
+https://google.com,safe
+https://github.com,safe
+https://www.microsoft.com,safe
+http://paypal-login.com,phishing
+http://secure-bank-update.com,phishing
+http://verify-account-alert.com,phishing
+https://youtube.com,safe
+http://login-free-gift-win.com,phishing
