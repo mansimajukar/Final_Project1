@@ -1,9 +1,50 @@
 # Final_Project1
 Real-Time AI/ML-Based Phishing Detection and Prevention System.
-# Phishing Detection System
 
-## 📌 Project Description
-This project detects phishing URLs using Machine Learning.
+## 📌 Project Overview
+This project is a machine learning-based phishing detection system that identifies whether a given URL is safe or malicious. It uses natural language processing techniques and a trained ML model to classify websites in real time. The system helps users detect phishing websites and improve online security.
+
+---
+
+## 🚀 Features
+- Detects phishing URLs in real time  
+- Machine learning-based prediction system  
+- Email alert system for phishing detection  
+- Stores prediction results  
+- Web-based user interface using Flask  
+
+---
+
+## 🛠️ Technologies Used
+- Python  
+- Flask  
+- Scikit-learn  
+- Pandas  
+- HTML, CSS  
+- Machine Learning  
+
+---
+
+## 🔄 Workflow
+1. User enters a URL in the system  
+2. URL is processed using feature extraction  
+3. ML model analyzes the input  
+4. System predicts phishing or safe website  
+5. Result is displayed to the user  
+6. Alert is triggered for phishing websites  
+
+---
+
+## ⚙️ Installation Steps
+
+```bash
+git clone https://github.com/mansimajukar/Final_Project1.git
+
+cd Final_Project1
+
+pip install -r requirements.txt
+
+python app.py
 
  
 #OUTPUT:
