@@ -25,3 +25,7 @@ This project detects phishing URLs using Machine Learning.
 
 2. Run:
    python app.py
+ 
+#OUTPUT:
+<img width="1365" height="635" alt="Screenshot 2026-05-04 185938" src="https://github.com/user-attachments/assets/97e74b52-248d-4e77-a7d8-b2432e58a7f9" />
+
