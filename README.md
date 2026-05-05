@@ -1,4 +1,5 @@
 # Final_Project1
+
 Real-Time AI/ML-Based Phishing Detection and Prevention System.
 
 ## 📌 Project Overview
@@ -44,7 +45,11 @@ cd Final_Project1
 
 pip install -r requirements.txt
 
-python app.py
+python app.py 
+
+
+## 📌 Project Description
+This project detects phishing URLs using Machine Learning.
 
  
 #OUTPUT:
