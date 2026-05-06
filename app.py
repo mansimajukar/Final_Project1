@@ -187,7 +187,7 @@ def predict():
 
     # 🚨 EMAIL ALERT
     if prediction == "Phishing":
-        print("🚨 Phishing detected! Sending alert...")
+        print("🚨 Alert Phishing detected! Sending alert...")
         send_email_alert(url, risk)
 
     return jsonify({
