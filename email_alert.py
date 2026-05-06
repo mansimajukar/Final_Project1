@@ -6,8 +6,8 @@ def send_email_alert(url):
     password = "your_app_password"
     receiver = "admin@gmail.com"
 
-    message = MIMEText(f"⚠ Phishing URL detected: {url}")
-    message["Subject"] = "Phishing Detection Alert"
+    message = MIMEText(f"⚠ Phishing URL detected:\n\nURL: {url}")
+    message["Subject"] = "🚨 Phishing Detection Alert"
     message["From"] = sender
     message["To"] = receiver
 
