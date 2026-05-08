@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threat Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial;
+}
+
+body {
+  background:#07111f;
+  color:#fff;
+}
+
+.layout {
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar {
+  width:240px;
+  background:#08182c;
+  padding:20px;
+}
+
+.logo {
+  font-size:22px;
+  color:#4da3ff;
+  margin-bottom:25px;
+}
+
+.menu li {
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:8px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.03);
+}
+
+.menu li:hover {
+  background:#1565ff;
+}
+
+.main {
+  flex:1;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+}
+
+.dashboard {
+  width:100%;
+  max-width:1100px;
+}
+
+.cards {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.card {
+  padding:16px;
+  background:rgba(255,255,255,0.03);
+  border-radius:10px;
+}
+
+.map-box {
+  background:rgba(255,255,255,0.03);
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:18px;
+}
+
+#map {
+  height:320px;
+  border-radius:10px;
+}
+
+.chart-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.panel {
+  background:rgba(255,255,255,0.03);
+  padding:12px;
+  border-radius:10px;
+}
+
+canvas {
+  max-height:220px !important;
+}
+
+/* 🔴 PHISHING GLOW */
+.phishing-glow {
+  box-shadow: 0 0 15px red, 0 0 30px red;
+  animation: pulseRed 1.5s infinite;
+}
+
+/* 🔵 SAFE GLOW */
+.safe-glow {
+  box-shadow: 0 0 10px #00e5ff;
+}
+
+/* 🔥 PULSE ANIMATION */
+@keyframes pulseRed {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<div class="sidebar">
+  <div class="logo">Phishing System</div>
+  <ul class="menu">
+    <li onclick="showDashboard()">Dashboard</li>
+    <li onclick="showHistory()">History</li>
+    <li onclick="window.location.href='email_alerts.html'">Email Alerts</li>
+    <li onclick="window.location.href='index.html'">Check URL</li>
+    <li onclick="logout()">Logout</li>
+  </ul>
+</div>
+
+<div class="main">
+
+<div id="dashboardView" class="dashboard">
+
+<h2>Threat Dashboard</h2>
+
+<div class="cards">
+  <div class="card"><h4>Total Scans</h4><h2 id="totalScans">0</h2></div>
+  <div class="card"><h4>Phishing</h4><h2 id="phishingDetected">0</h2></div>
+  <div class="card"><h4>Safe</h4><h2 id="safeUrls">0</h2></div>
+  <div class="card"><h4>Risk</h4><h2 id="riskScore">0%</h2></div>
+</div>
+
+<div class="map-box">
+  <h3>🌍 Live Attack Map</h3>
+  <div id="map"></div>
+</div>
+
+<div class="chart-row">
+  <div class="panel">
+    <h3>Threat Distribution</h3>
+    <canvas id="pieChart"></canvas>
+  </div>
+
+  <div class="panel">
+    <h3>Total Scans</h3>
+    <canvas id="barChart"></canvas>
+  </div>
+</div>
+
+</div>
+
+<div id="historyView" style="display:none; width:100%;">
+  <h2>URL History</h2>
+  <div class="panel" id="historyBox"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let map;
+let markers = [];
+let pieChart, barChart;
+
+const dashboardView = document.getElementById("dashboardView");
+const historyView = document.getElementById("historyView");
+
+const totalScansEl = document.getElementById("totalScans");
+const phishingDetectedEl = document.getElementById("phishingDetected");
+const safeUrlsEl = document.getElementById("safeUrls");
+const riskScoreEl = document.getElementById("riskScore");
+
+/* 🌍 MAP (DARK STYLE) */
+function initMap() {
+  map = L.map('map').setView([20, 0], 2);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap & CARTO'
+  }).addTo(map);
+}
+
+/* MAP UPDATE */
+function updateMapAll() {
+  let data = JSON.parse(localStorage.getItem("dashboardData"));
+  if (!data || !data.history) return;
+
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  data.history.forEach(item => {
+
+    if (!item.lat || !item.lon) return;
+
+    let isPhishing = item.prediction === "Phishing";
+
+    let marker = L.circleMarker([item.lat, item.lon], {
+      radius: isPhishing ? 10 : 8,
+      color: isPhishing ? "#ff3b3b" : "#00e5ff",
+      fillColor: isPhishing ? "#ff3b3b" : "#00e5ff",
+      fillOpacity: 0.9,
+      weight: 2
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <b style="color:${isPhishing ? '#ff3b3b' : '#00e5ff'}">
+        ${isPhishing ? "🚨 PHISHING DETECTED" : "✅ SAFE URL"}
+      </b><br>
+      ${item.url}
+    `);
+
+    markers.push(marker);
+  });
+
+  if (markers.length > 0) {
+    let group = new L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+  }
+}
+
+/* DASHBOARD */
+function loadDashboard() {
+  let data = JSON.parse(localStorage.getItem("dashboardData"));
+  if (!data) return;
+
+  totalScansEl.innerText = data.total_scans || 0;
+  phishingDetectedEl.innerText = data.phishing_detected || 0;
+  safeUrlsEl.innerText = data.safe_urls || 0;
+  riskScoreEl.innerText = (data.risk_score || 0) + "%";
+}
+
+/* CHARTS */
+function loadCharts() {
+  let data = JSON.parse(localStorage.getItem("dashboardData"));
+  if (!data || !data.history) return;
+
+  let phishing = 0, safe = 0;
+
+  data.history.forEach(i => {
+    if (i.prediction === "Phishing") phishing++;
+    else safe++;
+  });
+
+  if (pieChart) pieChart.destroy();
+  pieChart = new Chart(document.getElementById("pieChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Phishing", "Safe"],
+      datasets: [{
+        data: [phishing, safe],
+        backgroundColor: ["#ff4d4d", "#00ff99"]
+      }]
+    },
+    options: { maintainAspectRatio:false }
+  });
+
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById("barChart"), {
+    type: "bar",
+    data: {
+      labels: ["Total Scans"],
+      datasets: [{
+        data: [phishing + safe],
+        backgroundColor: "#00d4ff"
+      }]
+    },
+    options: { maintainAspectRatio:false }
+  });
+}
+
+/* HISTORY */
+function showHistory(){
+  dashboardView.style.display="none";
+  historyView.style.display="block";
+
+  let data = JSON.parse(localStorage.getItem("dashboardData"));
+  let box = document.getElementById("historyBox");
+
+  if(!data || !data.history){
+    box.innerHTML="No history";
+    return;
+  }
+
+  box.innerHTML="";
+
+  data.history.slice().reverse().forEach(i=>{
+    box.innerHTML += `
+      <div>
+        <b>${i.url}</b><br>
+        ${i.prediction} | Risk ${i.risk}%
+      </div><hr>
+    `;
+  });
+}
+
+function showDashboard(){
+  historyView.style.display="none";
+  dashboardView.style.display="block";
+}
+
+function logout(){
+  window.location.href="admin_login.html";
+}
+
+window.onload = () => {
+  initMap();
+  loadDashboard();
+  loadCharts();
+  updateMapAll();
+};
+
+setInterval(() => {
+  loadDashboard();
+  loadCharts();
+  updateMapAll();
+}, 2000);
+
+</script>
+
+</body>
+</html>

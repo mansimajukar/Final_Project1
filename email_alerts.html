@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Email Alerts</title>
+  <style>
+    body {
+      background: #07111f;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    th {
+      background: #1565ff;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🚨 Email Alerts (Phishing)</h1>
+
+<table>
+  <tr>
+    <th>URL</th>
+    <th>Risk</th>
+    <th>Time</th>
+  </tr>
+  <tbody id="alertTable"></tbody>
+</table>
+
+<script>
+function loadAlerts() {
+
+  let data = JSON.parse(localStorage.getItem("dashboardData"));
+
+  if (!data || !data.alerts || data.alerts.length === 0) {
+    document.getElementById("alertTable").innerHTML =
+      "<tr><td colspan='3'>No alerts yet</td></tr>";
+    return;
+  }
+
+  let table = document.getElementById("alertTable");
+  table.innerHTML = "";
+
+  data.alerts.forEach(alert => {
+    table.innerHTML += `
+      <tr>
+        <td>${alert.url}</td>
+        <td>${alert.risk}%</td>
+        <td>${alert.time}</td>
+      </tr>
+    `;
+  });
+}
+
+window.onload = loadAlerts;
+</script>
+
+</body>
+</html>

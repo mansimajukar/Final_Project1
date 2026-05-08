@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1>Admin Panel</h1>
+      <p class="subtitle">Secure access for phishing monitoring</p>
+
+      <input type="text" id="username" placeholder="Enter Username" />
+      <input type="password" id="password" placeholder="Enter Password" />
+
+      <button onclick="login()">Login</button>
+      <p id="msg" class="error"></p>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (user === "admin" && pass === "admin123") {
+        window.location.href = "dashboard.html";
+      } else {
+        document.getElementById("msg").innerText = "Invalid Username or Password";
+      }
+    }
+  </script>
+</body>
+</html>
